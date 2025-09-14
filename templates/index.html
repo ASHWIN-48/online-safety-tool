@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>🛡 Online Safety Tool</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Base */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Roboto', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(120deg, #ff9a9e, #fad0c4, #a18cd1, #fbc2eb);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            padding: 20px;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Glassmorphism container */
+        .container {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 25px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.25);
+            max-width: 700px;
+            width: 100%;
+            padding: 50px 40px;
+            text-align: center;
+            transition: transform 0.3s;
+        }
+        .container:hover { transform: translateY(-5px); }
+
+        /* Heading */
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 25px;
+            background: linear-gradient(90deg, #ff416c, #ff4b2b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Floating shield icon */
+        .floating-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+            animation: float 2s ease-in-out infinite alternate;
+            background: linear-gradient(90deg, #ff416c, #ff4b2b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            100% { transform: translateY(-15px); }
+        }
+
+        /* Social post card */
+        .social-post {
+            background: rgba(255,255,255,0.25);
+            padding: 20px 25px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            text-align: left;
+            font-size: 16px;
+            color: #151414;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            transition: transform 0.3s;
+        }
+        .social-post:hover { transform: translateY(-5px); }
+
+        /* Textarea */
+        textarea {
+            width: 100%;
+            padding: 20px;
+            border-radius: 20px;
+            border: none;
+            font-size: 16px;
+            resize: none;
+            outline: none;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            transition: all 0.3s;
+            background: rgba(255,255,255,0.25);
+            color: #100f0f;
+        }
+        textarea::placeholder { color: #121111; }
+        textarea:focus {
+            box-shadow: 0 10px 30px rgba(255,75,43,0.4);
+        }
+
+        /* Button */
+        button {
+            margin-top: 20px;
+            padding: 15px 40px;
+            font-size: 16px;
+            border: none;
+            border-radius: 50px;
+            background: linear-gradient(90deg, #ff416c, #ff4b2b);
+            color: #151414;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.25);
+        }
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 12px 35px rgba(0,0,0,0.35);
+        }
+
+        /* Result display */
+        .result {
+            margin-top: 25px;
+            font-size: 22px;
+            font-weight: bold;
+            padding: 20px;
+            border-radius: 20px;
+            min-width: 250px;
+            display: inline-block;
+            transition: all 0.3s;
+        }
+        .safe {
+            background-color: rgba(212, 237, 218,0.85);
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .unsafe {
+            background-color: rgba(248, 215, 218,0.85);
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Tip */
+        .tip {
+            margin-top: 20px;
+            font-size: 15px;
+            color: #1d1a1a;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container { padding: 30px 20px; }
+            h1 { font-size: 2em; }
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="floating-icon"><i class="fas fa-shield-alt"></i></div>
+        <h1>Online Safety Tool</h1>
+
+        <div class="social-post">
+            <strong>Fake Post Example:</strong><br>
+            Paste a message from social media or chat below:
+        </div>
+
+        <textarea id="message" rows="4" placeholder="Type or paste a message here..."></textarea><br>
+        <button id="checkBtn"><i class="fas fa-check-circle"></i> Check Message</button>
+
+        <div id="result" class="result"></div>
+        <div class="tip"><i class="fas fa-info-circle"></i> Tip: Never share your location or personal info online.</div>
+    </div>
+
+    <script>
+        document.getElementById("checkBtn").onclick = function() {
+            const message = document.getElementById("message").value;
+            fetch('/check', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                body: 'message=' + encodeURIComponent(message)
+            })
+            .then(response => response.json())
+            .then(data => {
+                const resultDiv = document.getElementById("result");
+                const emoji = data.status === 'safe' ? '✅' : '⚠';
+                resultDiv.innerText = `${emoji} ${data.text}`;
+                resultDiv.className = `result ${data.status}`;
+            });
+        }
+    </script>
+</body>
+</html>
